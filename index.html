@@ -933,6 +933,41 @@
             localStorage.setItem('theme', newTheme);
         });
 
+        // 7.5 GESTION DE LA MODALE DU CODE SOURCE
+        const modalBtns = document.querySelectorAll('.btn-open-modal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const overlays = document.querySelectorAll('.modal-overlay');
+
+        modalBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const modalId = btn.getAttribute('data-modal');
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('active');
+                    lenis.stop(); // Met en pause le défilement de la page arrière
+                }
+            });
+        });
+
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modal = btn.closest('.modal-overlay');
+                modal.classList.remove('active');
+                lenis.start(); // Reprend le défilement
+            });
+        });
+
+        overlays.forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                // Ferme la modale si on clique à l'extérieur (sur le fond flou)
+                if(e.target === overlay) { 
+                    overlay.classList.remove('active');
+                    lenis.start();
+                }
+            });
+        });
+
         // 8. ANIMATIONS GSAP AU DÉFILEMENT
         function initGSAP() {
             // Révélation classique venant du bas
