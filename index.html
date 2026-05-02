@@ -1,148 +1,965 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projet – Présentation</title>
+    <title>Bilal | Portfolio Professionnel</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons (Léger et moderne) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- STYLES GLOBAUX -->
     <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
+        /* ==========================================================================
+           VARIABLES & THÈMES (Light/Dark Mode)
+           ========================================================================== */
+        :root {
+            /* Mode Clair */
+            --bg-base: #f8fafc;
+            --bg-shapes: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --primary: #3b82f6; /* Bleu vibrant */
+            --primary-hover: #2563eb;
+            
+            /* Glassmorphism Light */
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-shadow: rgba(0, 0, 0, 0.05);
+            --card-bg: rgba(255, 255, 255, 0.8);
+            
+            /* Shapes */
+            --shape-1: rgba(59, 130, 246, 0.3);
+            --shape-2: rgba(139, 92, 246, 0.3);
+            
+            --nav-height: 80px;
+        }
+
+        [data-theme="dark"] {
+            /* Mode Sombre */
+            --bg-base: #020617;
+            --bg-shapes: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #60a5fa; 
+            --primary-hover: #93c5fd;
+            
+            /* Glassmorphism Dark */
+            --glass-bg: rgba(15, 23, 42, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: rgba(0, 0, 0, 0.3);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            
+            /* Shapes */
+            --shape-1: rgba(37, 99, 235, 0.25);
+            --shape-2: rgba(124, 58, 237, 0.25);
+        }
+
+        /* ==========================================================================
+           RESET & TYPOGRAPHIE
+           ========================================================================== */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Lenis s'occupe du smooth scroll, on désactive celui du CSS */
+        html { scroll-behavior: auto; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
             line-height: 1.6;
-            background: #f8f9fa;
-            color: #333;
         }
 
-        header {
-            background: #222;
-            color: #fff;
-            padding: 2rem 1rem;
-            text-align: center;
+        h1, h2, h3, h4, h5, h6, .font-heading {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            line-height: 1.2;
         }
 
-        h1, h2, h3 { margin-top: 0; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        img { max-width: 100%; display: block; }
 
-        section {
-            max-width: 950px;
-            margin: auto;
-            background: white;
-            padding: 2rem;
-            margin-top: 2rem;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        img {
+        /* ==========================================================================
+           COMPOSANTS GLOBAUX & EFFETS
+           ========================================================================== */
+        .container {
             width: 100%;
-            border-radius: 6px;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
         }
 
-        ul { margin-left: 1.2rem; }
+        section { padding: 6rem 0; position: relative; z-index: 2; }
+        .section-title { font-size: 2.5rem; margin-bottom: 3rem; text-align: center; font-weight: 800; }
+        .section-title span { color: var(--primary); }
 
-        .links a {
-            display: inline-block;
-            background: #0059b3;
-            padding: 0.6rem 1rem;
-            color: white;
-            margin-right: 1rem;
-            border-radius: 4px;
-            text-decoration: none;
-            margin-top: 10px;
+        /* Glassmorphism générique */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px var(--glass-shadow);
         }
 
-        .links a:hover { background: #003d80; }
+        /* Bouton principal */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-outline:hover { background: var(--glass-border); }
+
+        /* Pilules / Tags */
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            background: var(--glass-border);
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* Boutons Magnétiques (JS s'occupe de l'animation) */
+        .magnetic-wrap { display: inline-block; padding: 1rem; margin: -1rem; }
+
+        /* ==========================================================================
+           LOADER
+           ========================================================================== */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-base);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.8s cubic-bezier(0.85, 0, 0.15, 1);
+        }
+
+        .loader-dots { display: flex; gap: 0.5rem; }
+        .loader-dots span {
+            width: 12px; height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: bounce 0.5s infinite alternate;
+        }
+        .loader-dots span:nth-child(2) { animation-delay: 0.1s; }
+        .loader-dots span:nth-child(3) { animation-delay: 0.2s; }
+
+        @keyframes bounce { to { transform: translateY(-100%); } }
+
+        /* ==========================================================================
+           HEADER & NAVIGATION
+           ========================================================================== */
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--nav-height);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid transparent;
+        }
+
+        header.scrolled {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.05);
+        }
+
+        .nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+
+        .logo { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; display: flex; align-items: baseline; }
+        
+        /* Les 3 petits points animés du logo */
+        .logo-dots { display: inline-flex; margin-left: 2px; }
+        .logo-dots span {
+            width: 4px; height: 4px; background: var(--primary); border-radius: 50%; margin: 0 1px;
+            animation: pulse 1.5s infinite;
+        }
+        .logo-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .logo-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { font-weight: 500; transition: color 0.3s; position: relative; }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px;
+            background: var(--primary); transition: width 0.3s ease;
+        }
+        .nav-links a:hover::after { width: 100%; }
+
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; background: none; border: none; color: var(--text-main); }
+
+        /* ==========================================================================
+           HERO SECTION (Accueil)
+           ========================================================================== */
+        #hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding-top: var(--nav-height);
+            overflow: hidden;
+        }
+
+        /* Formes géométriques flottantes */
+        .bg-shapes { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .shape {
+            position: absolute; border-radius: 50%; filter: blur(80px);
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .shape-1 { width: 400px; height: 400px; background: var(--shape-1); top: -10%; left: -10%; }
+        .shape-2 { width: 500px; height: 500px; background: var(--shape-2); bottom: -20%; right: -10%; animation-delay: -5s; }
+        .shape-3 { width: 300px; height: 300px; background: var(--shape-1); top: 40%; left: 50%; opacity: 0.5; animation-delay: -10s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100px, 50px) rotate(20deg); }
+        }
+
+        .hero-content { position: relative; z-index: 2; max-width: 800px; }
+        .hero-title { font-size: 4.5rem; font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        .hero-subtitle { font-size: 1.25rem; color: var(--text-muted); margin-bottom: 2.5rem; font-weight: 300; }
+        
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; }
+
+        /* ==========================================================================
+           SECTION À PROPOS
+           ========================================================================== */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 1.5rem; }
+
+        /* Glass Card: Mon Rôle */
+        .role-card {
+            border-radius: 24px;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-header { display: flex; align-items: center; gap: 1.5rem; }
+        .role-avatar {
+            width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--primary); padding: 3px;
+        }
+        .role-info h3 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+        .role-info p { color: var(--primary); font-weight: 500; font-size: 1rem; }
+        .social-links { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+        .social-links a {
+            display: inline-flex; width: 36px; height: 36px; border-radius: 50%;
+            background: var(--glass-border); align-items: center; justify-content: center;
+            transition: all 0.3s;
+        }
+        .social-links a:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
+            padding: 1rem; border-radius: 16px; text-align: center;
+        }
+        .stat-item h4 { font-size: 2rem; color: var(--primary); margin-bottom: 0.25rem; }
+        .stat-item p { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 1px;}
+
+        /* ==========================================================================
+           SECTION MON ENTREPRISE / EXPÉRIENCE
+           ========================================================================== */
+        .exp-container { max-width: 800px; margin: 0 auto; text-align: center; }
+        .exp-text { color: var(--text-muted); margin-bottom: 2rem; font-size: 1.1rem; }
+        
+        .exp-accordion {
+            text-align: left;
+            margin-top: 2rem;
+            display: none; /* Masqué par défaut, affiché via JS */
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            padding: 2rem;
+            border-radius: 16px;
+        }
+        .exp-accordion.active { display: block; animation: fadeIn 0.5s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Petit organigramme CSS design */
+        .organigram {
+            margin-top: 3rem;
+            display: flex; flex-direction: column; align-items: center; gap: 2rem;
+            position: relative;
+        }
+        .org-node {
+            padding: 1rem 2rem; border-radius: 12px; background: var(--card-bg);
+            border: 1px solid var(--glass-border); font-weight: 600; position: relative;
+            z-index: 2; box-shadow: 0 4px 20px var(--glass-shadow);
+        }
+        .org-node.me { border-color: var(--primary); background: var(--primary); color: #fff; }
+        
+        .org-branches { display: flex; gap: 4rem; position: relative; }
+        /* Lignes de connexion */
+        .org-branches::before {
+            content: ''; position: absolute; top: -2rem; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 4rem); height: 2px; background: var(--glass-border); z-index: 1;
+        }
+        .org-branches .org-node::before {
+            content: ''; position: absolute; top: -2rem; left: 50%; transform: translateX(-50%);
+            width: 2px; height: 2rem; background: var(--glass-border); z-index: 1;
+        }
+        .org-chief { position: relative; }
+        .org-chief::after {
+            content: ''; position: absolute; bottom: -2rem; left: 50%; transform: translateX(-50%);
+            width: 2px; height: 2rem; background: var(--glass-border); z-index: 1;
+        }
+
+        /* ==========================================================================
+           SECTION MISSIONS / PROJETS
+           ========================================================================== */
+        .filters { display: flex; justify-content: center; gap: 1rem; margin-bottom: 3rem; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 0.5rem 1.5rem; border-radius: 30px; border: 1px solid var(--glass-border);
+            background: var(--card-bg); color: var(--text-main); font-weight: 500;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .filter-btn.active, .filter-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        .projects-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;
+        }
+
+        .project-card {
+            border-radius: 20px; overflow: hidden; position: relative;
+            background: var(--card-bg); border: 1px solid var(--glass-border);
+            transition: transform 0.4s ease;
+        }
+        .project-card:hover { transform: translateY(-10px); }
+
+        .project-img-wrapper { position: relative; width: 100%; height: 220px; overflow: hidden; }
+        .project-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .project-card:hover .project-img { transform: scale(1.05); }
+        
+        .project-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .project-card:hover .project-overlay { opacity: 1; }
+
+        .project-content { padding: 1.5rem; }
+        .project-category { color: var(--primary); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; display: block; }
+        .project-title { font-size: 1.25rem; margin-bottom: 0.5rem; }
+        .project-desc { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .project-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+        /* ==========================================================================
+           SECTION VEILLE TECHNOLOGIQUE
+           ========================================================================== */
+        .veille-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 3rem; align-items: center; }
+
+        .methodology { display: flex; flex-direction: column; gap: 1.5rem; }
+        .method-item {
+            display: flex; align-items: flex-start; gap: 1rem;
+            padding: 1.5rem; border-radius: 16px; background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+        }
+        .method-icon {
+            width: 50px; height: 50px; border-radius: 12px; background: var(--shape-1);
+            color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+        }
+        .method-item h4 { margin-bottom: 0.25rem; }
+        .method-item p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* Article Card Misa en avant */
+        .article-card {
+            border-radius: 24px; overflow: hidden; position: relative;
+            background: var(--card-bg); border: 1px solid var(--glass-border);
+        }
+        .article-img { width: 100%; height: 250px; object-fit: cover; }
+        .article-content { padding: 2rem; }
+        .article-date { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; display: block; }
+        .article-title { font-size: 1.5rem; margin-bottom: 1rem; }
+        .article-link { color: var(--primary); font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; transition: gap 0.3s; }
+        .article-link:hover { gap: 0.75rem; }
+
+        /* ==========================================================================
+           CONTACT & FOOTER
+           ========================================================================== */
+        #contact { text-align: center; }
+        .contact-form { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+        
+        .form-group { position: relative; text-align: left; }
+        .form-control {
+            width: 100%; padding: 1rem 1.5rem; border-radius: 12px;
+            background: var(--card-bg); border: 1px solid var(--glass-border);
+            color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 1rem;
+            outline: none; transition: border-color 0.3s;
+        }
+        .form-control:focus { border-color: var(--primary); }
+        textarea.form-control { resize: vertical; min-height: 150px; }
+
+        footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--glass-border); margin-top: 4rem; }
+        footer p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* ==========================================================================
+           OUTILS FLOTTANTS (THEME TOGGLE)
+           ========================================================================== */
+        .floating-tools {
+            position: fixed; bottom: 2rem; right: 2rem; z-index: 100;
+            display: flex; flex-direction: column; gap: 1rem;
+        }
+        .theme-toggle {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); color: var(--text-main);
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+            cursor: pointer; box-shadow: 0 4px 15px var(--glass-shadow); transition: all 0.3s;
+        }
+        .theme-toggle:hover { transform: scale(1.1); background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .ph-sun { display: none; }
+        [data-theme="dark"] .ph-sun { display: block; }
+        [data-theme="dark"] .ph-moon { display: none; }
+
+        /* ==========================================================================
+           RESPONSIVE DESIGN
+           ========================================================================== */
+        @media (max-width: 992px) {
+            .about-grid, .veille-grid { grid-template-columns: 1fr; }
+            .hero-title { font-size: 3.5rem; }
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .nav-links {
+                position: fixed; top: var(--nav-height); left: 0; right: 0;
+                background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                flex-direction: column; gap: 1.5rem; padding: 2rem;
+                transform: translateY(-150%); transition: transform 0.4s ease;
+                border-bottom: 1px solid var(--glass-border);
+                text-align: center;
+            }
+            .nav-links.active { transform: translateY(0); }
+            
+            .hero-title { font-size: 2.8rem; }
+            .org-branches { flex-direction: column; gap: 2rem; align-items: center; }
+            .org-branches::before, .org-branches .org-node::before { display: none; } /* On cache les lignes complexes sur mobile */
+            .org-chief::after { display: none; }
+        }
     </style>
 </head>
-
 <body>
 
-<header>
-    <h1>MON PROJET</h1>
-    <p>Présentation générale, explications, MCD, captures, code source et documentation</p>
-</header>
+    <!-- LOADER -->
+    <div id="loader">
+        <div class="loader-dots">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
 
-<section>
-    <h2> Objectif du projet</h2>
-    <p>
-        Ce projet visait à mobiliser la modélisation, le développement, la gestion de données
-        et le déploiement sur un hébergement web.
-    </p>
-</section>
+    <!-- BACKGROUND SHAPES GLOBALES -->
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
 
-<section>
-    <h2> Ressources fournies</h2>
-    <ul>
-        <li>Un cahier des charges listant les fonctionnalités attendues</li>
-        <li>Des exemples d’écrans ou maquettes</li>
-        <li>Un modèle conceptuel partiellement défini</li>
-        <li>Un jeu de données pour les tests éventuels</li>
-    </ul>
+    <!-- HEADER / NAV -->
+    <header id="header">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                Bilal<div class="logo-dots"><span></span><span></span><span></span></div>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="#about">À propos</a>
+                <a href="#experience">Expérience</a>
+                <a href="#missions">Missions</a>
+                <a href="#veille">Veille Tech</a>
+                <a href="#contact">Contact</a>
+            </nav>
 
-    
+            <button class="menu-toggle"><i class="ph ph-list"></i></button>
+        </div>
+    </header>
 
-<section>
-    <h2> Travail réalisé</h2>
-    <h3> Modélisation</h3>
-    <ul>
-        <li>Création / finalisation du MCD</li>
-        <li>Déduction du MPD et création de la base de données</li>
-    </ul>
+    <main>
+        <!-- SECTION HERO -->
+        <section id="hero">
+            <div class="container hero-content gsap-reveal">
+                <h1 class="hero-title">Bilal | Portfolio</h1>
+                <p class="hero-subtitle">Développeur Front-End Expert & UI/UX Designer passionné par la création d'expériences web fluides, esthétiques et performantes.</p>
+                <div class="hero-buttons">
+                    <div class="magnetic-wrap">
+                        <a href="#missions" class="btn btn-primary magnetic-btn">
+                            Voir mes missions <i class="ph ph-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="magnetic-wrap">
+                        <a href="#contact" class="btn btn-outline magnetic-btn">
+                            Me contacter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <h3> Développement</h3>
-    <ul>
-        <li>Développement de l’interface utilisateur</li>
-        <li>Mise en place de la logique applicative</li>
-    </ul>
+        <!-- SECTION À PROPOS -->
+        <section id="about">
+            <div class="container">
+                <h2 class="section-title gsap-reveal">À <span>Propos</span> de moi</h2>
+                
+                <div class="about-grid">
+                    <div class="about-text gsap-reveal">
+                        <p>Hello ! Je suis Bilal, un développeur Front-End créatif basé en France. Mon objectif est de combler le fossé entre le design interactif et l'ingénierie technique.</p>
+                        <p>Spécialisé dans les écosystèmes JavaScript modernes, je conçois des interfaces "pixel-perfect" qui intègrent des animations avancées tout en garantissant des performances optimales et une accessibilité exemplaire.</p>
+                    </div>
 
+                    <div class="role-card glass gsap-reveal">
+                        <div class="role-header">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" alt="Profil de Bilal" class="role-avatar">
+                            <div class="role-info">
+                                <h3>Mon Rôle Actuel</h3>
+                                <p>Lead Développeur Front-End</p>
+                                <div class="social-links">
+                                    <a href="#" target="_blank" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
+                                    <a href="#" target="_blank" aria-label="GitHub"><i class="ph ph-github-logo"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <h4>4+</h4>
+                                <p>Années d'exp.</p>
+                            </div>
+                            <div class="stat-item">
+                                <h4>30+</h4>
+                                <p>Projets Livrés</p>
+                            </div>
+                            <div class="stat-item">
+                                <h4>15+</h4>
+                                <p>Technos Maîtrisées</p>
+                            </div>
+                            <div class="stat-item">
+                                <h4>100%</h4>
+                                <p>Engagement</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
+        <!-- SECTION MON ENTREPRISE / EXPÉRIENCE -->
+        <section id="experience">
+            <div class="container">
+                <h2 class="section-title gsap-reveal">Mon <span>Entreprise</span></h2>
+                
+                <div class="exp-container gsap-reveal">
+                    <p class="exp-text">Je travaille actuellement chez <strong>TechNova Agency</strong>, une agence digitale primée où nous redéfinissons les standards du web moderne pour des clients internationaux.</p>
+                    
+                    <button id="btn-more-exp" class="btn btn-outline">En savoir plus <i class="ph ph-caret-down"></i></button>
+                    
+                    <div id="content-more-exp" class="exp-accordion">
+                        <p style="color: var(--text-muted); margin-bottom: 1rem;">Au sein de TechNova, j'ai la chance de travailler dans une structure agile. Mon rôle consiste à concevoir l'architecture front-end des projets majeurs, à mentorer les développeurs juniors et à implémenter des designs complexes en étroite collaboration avec l'équipe UI/UX.</p>
+                        
+                        <h4 style="margin-bottom: 1.5rem; margin-top: 2rem; text-align: center; font-family: 'Outfit', sans-serif;">Structure de l'équipe Tech</h4>
+                        <!-- Organigramme CSS -->
+                        <div class="organigram">
+                            <div class="org-node org-chief">CTO / Directeur Technique</div>
+                            <div class="org-branches">
+                                <div class="org-node">Lead Back-End</div>
+                                <div class="org-node me">Moi (Lead Front-End)</div>
+                                <div class="org-node">Lead UI/UX</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<section>
-    <h2> Modèle Conceptuel de Données (MCD)</h2>
-    <p>Voici le modèle conceptuel utilisé pour le projet :</p>
+        <!-- SECTION MISSIONS / PROJETS -->
+        <section id="missions">
+            <div class="container">
+                <h2 class="section-title gsap-reveal">Mes <span>Missions</span> & Projets</h2>
+                
+                <div class="filters gsap-reveal">
+                    <button class="filter-btn active" data-filter="all">Tous</button>
+                    <button class="filter-btn" data-filter="pro">Projets Pros</button>
+                    <button class="filter-btn" data-filter="perso">Projets Persos</button>
+                </div>
 
-    <!-- Remplacer l'image -->
-    <img src="assets/images/Capture d'écran 2026-02-06 175126.png" alt="Modèle Conceptuel de Données">
-</section>
+                <div class="projects-grid">
+                    <!-- Carte 1 -->
+                    <div class="project-card gsap-reveal project-item pro">
+                        <div class="project-img-wrapper">
+                            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop" alt="Dashboard FinTech" class="project-img">
+                            <div class="project-overlay">
+                                <a href="#" class="btn btn-primary">Voir plus</a>
+                            </div>
+                        </div>
+                        <div class="project-content">
+                            <span class="project-category">Projet Pro</span>
+                            <h3 class="project-title">Dashboard FinTech Analytics</h3>
+                            <p class="project-desc">Création d'un tableau de bord financier complet avec graphiques temps réel et interface d'administration complexe.</p>
+                            <div class="project-tags">
+                                <span class="tag">React</span>
+                                <span class="tag">TypeScript</span>
+                                <span class="tag">Tailwind</span>
+                            </div>
+                        </div>
+                    </div>
 
-<section>
-    <h2> Captures d’écran</h2>
+                    <!-- Carte 2 -->
+                    <div class="project-card gsap-reveal project-item perso">
+                        <div class="project-img-wrapper">
+                            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop" alt="Code Editor" class="project-img">
+                            <div class="project-overlay">
+                                <a href="#" class="btn btn-primary">Voir plus</a>
+                            </div>
+                        </div>
+                        <div class="project-content">
+                            <span class="project-category">Projet Perso</span>
+                            <h3 class="project-title">Web Code Editor</h3>
+                            <p class="project-desc">Un éditeur de code en ligne collaboratif, inspiré de VS Code, supportant de multiples langages de programmation.</p>
+                            <div class="project-tags">
+                                <span class="tag">Vue.js</span>
+                                <span class="tag">Node.js</span>
+                                <span class="tag">WebSockets</span>
+                            </div>
+                        </div>
+                    </div>
 
-    <p>Quelques aperçus de l’application :</p>
+                    <!-- Carte 3 -->
+                    <div class="project-card gsap-reveal project-item pro">
+                        <div class="project-img-wrapper">
+                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop" alt="E-Commerce 3D" class="project-img">
+                            <div class="project-overlay">
+                                <a href="#" class="btn btn-primary">Voir plus</a>
+                            </div>
+                        </div>
+                        <div class="project-content">
+                            <span class="project-category">Projet Pro</span>
+                            <h3 class="project-title">E-Commerce avec viewer 3D</h3>
+                            <p class="project-desc">Intégration d'une expérience d'achat immersive où les utilisateurs peuvent manipuler les produits en 3D via Three.js.</p>
+                            <div class="project-tags">
+                                <span class="tag">Three.js</span>
+                                <span class="tag">Next.js</span>
+                                <span class="tag">GSAP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <!-- Ajouter plusieurs captures ici -->
-    <img src="assets/images/Capture d'écran 2026-02-06 172106.png" alt="Capture écran 1">
-    <img src="assets/images/Capture d'écran 2026-02-06 172201.png" alt="Capture écran 2">
-</section>
+        <!-- SECTION VEILLE TECHNOLOGIQUE -->
+        <section id="veille">
+            <div class="container">
+                <h2 class="section-title gsap-reveal"><span>Veille</span> Technologique</h2>
+                
+                <div class="veille-grid">
+                    <div class="methodology gsap-reveal">
+                        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">Ma Méthodologie</h3>
+                        <div class="method-item">
+                            <div class="method-icon"><i class="ph ph-radar"></i></div>
+                            <div>
+                                <h4>Sourcing</h4>
+                                <p>Utilisation d'agrégateurs (Feedly), newsletters spécialisées et réseaux (Twitter, GitHub) pour capter l'information à la source.</p>
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-icon"><i class="ph ph-flask"></i></div>
+                            <div>
+                                <h4>Analyse & Test</h4>
+                                <p>Mise en pratique via la création de "Proof of Concepts" (POC) pour tester les nouvelles librairies et frameworks (ex: Bun, Qwik).</p>
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-icon"><i class="ph ph-share-network"></i></div>
+                            <div>
+                                <h4>Diffusion</h4>
+                                <p>Partage des trouvailles avec mon équipe via des réunions techniques hebdomadaires et rédaction d'articles techniques.</p>
+                            </div>
+                        </div>
+                    </div>
 
-<section>
-    <h2> Fonctionnalités principales</h2>
-    <ul>
-        <li>Application de gestion des ligues</li>
-        <li>Permet de gérer les employés</li>
-        <li>Administrer les ligues</li>
-        <li>etc.</li>
-    </ul>
-</section>
+                    <div class="article-card gsap-reveal">
+                        <img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=800&auto=format&fit=crop" alt="Tech Watch Article" class="article-img">
+                        <div class="article-content">
+                            <span class="article-date">Mis en avant • Thématique : WebGL & Performances</span>
+                            <h3 class="article-title">L'avenir du rendu web avec WebGPU</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">Exploration des capacités de WebGPU par rapport à WebGL. Comment cette nouvelle API va révolutionner les expériences immersives sur le web en utilisant directement la puissance de la carte graphique...</p>
+                            <a href="#" class="article-link">Lire l'article complet <i class="ph ph-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<section class="links">
-    <h2> Liens utiles</h2>
+        <!-- SECTION CONTACT -->
+        <section id="contact">
+            <div class="container">
+                <h2 class="section-title gsap-reveal">Discutons de votre <span>Projet</span></h2>
+                
+                <form class="contact-form glass gsap-reveal" style="padding: 3rem; border-radius: 24px;">
+                    <div class="form-group">
+                        <input type="text" class="form-control glass" placeholder="Votre Nom complet" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="form-control glass" placeholder="Votre Adresse E-mail" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea class="form-control glass" placeholder="Parlez-moi de votre projet, de vos besoins..." required></textarea>
+                    </div>
+                    <div class="magnetic-wrap" style="align-self: center;">
+                        <button type="submit" class="btn btn-primary magnetic-btn" style="padding: 1rem 3rem;">Envoyer le message</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
 
-    <a href="https://github.com/REDA0704/personnel#" target="_blank">Code source GitHub</a>
-</section>
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Bilal Portfolio. Tous droits réservés. Design Premium & Code avec passion.</p>
+        </div>
+    </footer>
 
-<section>
-    <h2> Conclusion</h2>
-    <p>
-        Ce projet m’a permis de développer mes compétences en modélisation, développement d’application.
-        Il illustre ma capacité à analyser un besoin, la développer et la mettre en production.
-    </p>
-</section>
+    <!-- OUTILS FLOTTANTS (THEME) -->
+    <div class="floating-tools">
+        <button class="theme-toggle" id="theme-btn" aria-label="Toggle Theme">
+            <i class="ph ph-sun"></i>
+            <i class="ph ph-moon"></i>
+        </button>
+    </div>
 
-<footer></footer>
+    <!-- SCRIPTS -->
+    <!-- Lenis pour le Smooth Scroll -->
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.39/dist/lenis.min.js"></script>
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <script>
+        // 1. GESTION DU LOADER
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            setTimeout(() => {
+                loader.style.transform = 'translateY(-100%)';
+                // Lancement des animations GSAP une fois chargé
+                initGSAP();
+            }, 800); // Petit délai pour voir l'effet
+        });
+
+        // 2. INITIALISATION LENIS (SMOOTH SCROLL)
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Easing fluide
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // Synchro Lenis avec ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+        gsap.ticker.lagSmoothing(0, 0);
+
+        // 3. HEADER STICKY & MENU MOBILE
+        const header = document.getElementById('header');
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+        });
+
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            const icon = menuToggle.querySelector('i');
+            if (navLinks.classList.contains('active')) {
+                icon.classList.replace('ph-list', 'ph-x');
+            } else {
+                icon.classList.replace('ph-x', 'ph-list');
+            }
+        });
+
+        // Fermer le menu au clic sur un lien (mobile)
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                menuToggle.querySelector('i').classList.replace('ph-x', 'ph-list');
+            });
+        });
+
+        // 4. BOUTONS MAGNÉTIQUES
+        const magneticBtns = document.querySelectorAll('.magnetic-btn');
+        magneticBtns.forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const h = rect.width / 2;
+                const v = rect.height / 2;
+                const x = e.clientX - rect.left - h;
+                const y = e.clientY - rect.top - v;
+                
+                // Limiter le mouvement pour ne pas sortir du cadre visuel
+                gsap.to(btn, { x: x * 0.4, y: y * 0.4, duration: 0.4, ease: 'power2.out' });
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1, 0.3)' });
+            });
+        });
+
+        // 5. ACCORDÉON "EN SAVOIR PLUS" (Expérience)
+        const btnMoreExp = document.getElementById('btn-more-exp');
+        const contentMoreExp = document.getElementById('content-more-exp');
+        
+        btnMoreExp.addEventListener('click', () => {
+            contentMoreExp.classList.toggle('active');
+            const icon = btnMoreExp.querySelector('i');
+            
+            if (contentMoreExp.classList.contains('active')) {
+                btnMoreExp.innerHTML = 'Voir moins <i class="ph ph-caret-up"></i>';
+                // Refresh ScrollTrigger as DOM height changed
+                setTimeout(() => ScrollTrigger.refresh(), 100);
+            } else {
+                btnMoreExp.innerHTML = 'En savoir plus <i class="ph ph-caret-down"></i>';
+                setTimeout(() => ScrollTrigger.refresh(), 100);
+            }
+        });
+
+        // 6. SYSTÈME DE FILTRES (Projets)
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const projectItems = document.querySelectorAll('.project-item');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const filterValue = btn.getAttribute('data-filter');
+                
+                projectItems.forEach(item => {
+                    if (filterValue === 'all' || item.classList.contains(filterValue)) {
+                        item.style.display = 'block';
+                        gsap.fromTo(item, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power2.out' });
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                ScrollTrigger.refresh();
+            });
+        });
+
+        // 7. THÈME SOMBRE/CLAIR
+        const themeBtn = document.getElementById('theme-btn');
+        const html = document.documentElement;
+        
+        // Vérifier le localStorage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            html.setAttribute('data-theme', savedTheme);
+        }
+
+        themeBtn.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // 8. ANIMATIONS GSAP AU DÉFILEMENT
+        function initGSAP() {
+            // Révélation classique venant du bas
+            gsap.utils.toArray('.gsap-reveal').forEach(element => {
+                gsap.from(element, {
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse" // rejoue si on remonte
+                    },
+                    y: 50,
+                    opacity: 0,
+                    duration: 1,
+                    ease: "power3.out"
+                });
+            });
+
+            // Animation des formes géométriques via scroll (Parallax)
+            gsap.to('.shape-1', {
+                scrollTrigger: { trigger: 'body', start: "top top", end: "bottom bottom", scrub: 1 },
+                y: 300, rotation: 45
+            });
+            gsap.to('.shape-2', {
+                scrollTrigger: { trigger: 'body', start: "top top", end: "bottom bottom", scrub: 1.5 },
+                y: -200, rotation: -45
+            });
+        }
+    </script>
 </body>
 </html>
