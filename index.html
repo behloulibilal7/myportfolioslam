@@ -13,6 +13,9 @@
     <!-- Phosphor Icons (Léger et moderne) -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
+    <!-- Highlight.js pour la coloration syntaxique du code source -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
     <style>
         /* ==========================================================================
            VARIABLES & THÈMES (Light/Dark Mode)
@@ -469,11 +472,329 @@
         [data-theme="dark"] .ph-moon { display: none; }
 
         /* ==========================================================================
+           MODALS (Code Source & Explications)
+           ========================================================================== */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.4s ease; padding: 2rem;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .modal-container {
+            background: var(--bg-base); width: 100%; max-width: 1200px; max-height: 90vh;
+            border-radius: 24px; border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; overflow: hidden; transform: translateY(30px); transition: transform 0.4s ease;
+        }
+        .modal-overlay.active .modal-container { transform: translateY(0); }
+
+        .modal-header {
+            padding: 1.5rem 2rem; border-bottom: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center; background: var(--glass-bg);
+        }
+        .close-modal {
+            background: transparent; border: none; color: var(--text-main); font-size: 1.5rem;
+            cursor: pointer; transition: color 0.3s;
+        }
+        .close-modal:hover { color: var(--primary); }
+
+        .modal-body { 
+            padding: 1.5rem; 
+            background: var(--bg-shapes);
+            display: grid; 
+            grid-template-columns: 350px 1fr; 
+            gap: 2rem; 
+            overflow-y: auto;
+            max-height: calc(90vh - 80px);
+        }
+
+        /* Barre latérale des explications */
+        .explanations-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        
+        .explanations-sidebar::-webkit-scrollbar { width: 6px; }
+        .explanations-sidebar::-webkit-scrollbar-track { background: transparent; }
+        .explanations-sidebar::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
+
+        .expl-step {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            padding: 1.25rem;
+            border-radius: 16px;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .expl-step:hover {
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+        .expl-step h4 {
+            color: var(--primary);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .expl-step p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        /* IDE Window / Code Viewer Style */
+        .ide-window {
+            background: #282c34; /* Atom One Dark bg */
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .ide-header {
+            background: #21252b;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #181a1f;
+        }
+
+        .ide-controls { display: flex; gap: 0.5rem; }
+        .ide-controls span {
+            width: 12px; height: 12px; border-radius: 50%; display: inline-block;
+        }
+        .ide-controls span:nth-child(1) { background: #ff5f56; }
+        .ide-controls span:nth-child(2) { background: #ffbd2e; }
+        .ide-controls span:nth-child(3) { background: #27c93f; }
+
+        .ide-title {
+            color: #abb2bf;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #abb2bf;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.3s;
+        }
+        .btn-copy:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+        .btn-copy.copied { background: #27c93f; color: #fff; }
+
+        .ide-content {
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .ide-content pre { margin: 0; }
+        .ide-content code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            padding: 1.5rem !important; /* Override highlight.js padding */
+        }
+
+        /* Personnalisation de la scrollbar pour l'IDE */
+        .ide-content::-webkit-scrollbar { width: 10px; }
+        .ide-content::-webkit-scrollbar-track { background: #282c34; }
+        .ide-content::-webkit-scrollbar-thumb { background: #4b5363; border-radius: 5px; }
+        .ide-content::-webkit-scrollbar-thumb:hover { background: #5c6370; }
+
+        /* Style spécifique modale présentation sans code */
+        .presentation-window {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 2rem;
+            text-align: center;
+            height: 100%;
+            box-shadow: 0 10px 30px var(--glass-shadow);
+        }
+
+        /* ==========================================================================
+           SECTION VEILLE TECHNOLOGIQUE — AMÉLIORÉE
+           ========================================================================== */
+
+        .veille-stats {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 4rem;
+            flex-wrap: wrap;
+            gap: 0;
+        }
+        .veille-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 2.5rem;
+        }
+        .veille-stat-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+        .veille-stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+            text-align: center;
+        }
+        .veille-stat-divider { width: 1px; height: 40px; background: var(--glass-border); }
+
+        .veille-sub-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; }
+        .veille-methodology-wrapper { margin-bottom: 4rem; }
+
+        .veille-stepper { display: flex; align-items: flex-start; gap: 1rem; }
+        .stepper-step {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .stepper-step:hover { border-color: var(--primary); transform: translateY(-4px); }
+        .stepper-icon {
+            width: 52px; height: 52px; border-radius: 14px;
+            background: rgba(59,130,246,0.12); color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; margin-bottom: 1.2rem;
+        }
+        .stepper-step h4 { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; }
+        .stepper-step p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; }
+        .stepper-arrow {
+            display: flex; align-items: center; justify-content: center;
+            padding-top: 2.5rem; color: var(--text-muted); font-size: 1.3rem; flex-shrink: 0;
+        }
+
+        .veille-filters { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+        .veille-filter-btn {
+            padding: 0.5rem 1.25rem; border-radius: 30px;
+            border: 1px solid var(--glass-border); background: var(--card-bg);
+            color: var(--text-muted); font-size: 0.88rem; font-weight: 500;
+            cursor: pointer; transition: all 0.25s;
+        }
+        .veille-filter-btn.active, .veille-filter-btn:hover {
+            background: var(--primary); color: #fff; border-color: var(--primary);
+        }
+
+        .veille-featured {
+            display: grid; grid-template-columns: 1.2fr 1fr;
+            gap: 0; border-radius: 24px; overflow: hidden;
+            border: 1px solid var(--glass-border); background: var(--card-bg);
+            margin-bottom: 2rem; transition: transform 0.4s ease;
+        }
+        .veille-featured:hover { transform: translateY(-6px); }
+        .featured-img-wrapper { position: relative; overflow: hidden; min-height: 320px; }
+        .featured-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .veille-featured:hover .featured-img { transform: scale(1.04); }
+        .featured-badge {
+            position: absolute; top: 1rem; left: 1rem;
+            background: var(--primary); color: #fff;
+            font-size: 0.78rem; font-weight: 700;
+            padding: 0.35rem 0.85rem; border-radius: 20px;
+            display: flex; align-items: center; gap: 0.35rem;
+        }
+        .featured-content {
+            padding: 2.5rem; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .article-meta { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .article-category-badge {
+            font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.75rem;
+            border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .article-category-badge.ia { background: rgba(139,92,246,0.15); color: #a78bfa; }
+        .article-category-badge.web { background: rgba(59,130,246,0.15); color: var(--primary); }
+        .article-category-badge.securite { background: rgba(239,68,68,0.15); color: #f87171; }
+        .article-category-badge.devops { background: rgba(16,185,129,0.15); color: #34d399; }
+        .article-read-time, .article-date-badge {
+            font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem;
+        }
+        .featured-title { font-size: 1.5rem; margin-bottom: 1rem; line-height: 1.3; }
+        .featured-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; flex-grow: 1; }
+        .featured-footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .article-tags-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+        .veille-articles-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.5rem; margin-bottom: 3.5rem;
+        }
+        .veille-article-card {
+            background: var(--card-bg); border: 1px solid var(--glass-border);
+            border-radius: 20px; overflow: hidden; transition: transform 0.35s, border-color 0.3s;
+        }
+        .veille-article-card:hover { transform: translateY(-6px); border-color: var(--primary); }
+        .veille-article-img { width: 100%; height: 160px; object-fit: cover; transition: transform 0.5s; }
+        .veille-article-card:hover .veille-article-img { transform: scale(1.04); }
+        .veille-article-content { padding: 1.4rem; }
+        .veille-article-title { font-size: 1rem; font-weight: 700; margin: 0.75rem 0 0.5rem; line-height: 1.4; }
+        .veille-article-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .veille-article-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+        .article-link-small { font-size: 0.85rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 0.3rem; transition: gap 0.25s; }
+        .article-link-small:hover { gap: 0.5rem; }
+
+        .veille-sources-wrapper {
+            background: var(--card-bg); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 2.5rem;
+        }
+        .sources-grid { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
+        .source-item {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.6rem 1.25rem; border-radius: 30px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            font-size: 0.9rem; font-weight: 500; color: var(--text-muted); transition: all 0.25s;
+        }
+        .source-item:hover { border-color: var(--primary); color: var(--primary); }
+        .source-item i { font-size: 1.1rem; }
+        .veille-item.hidden { display: none !important; }
+
+        /* ==========================================================================
            RESPONSIVE DESIGN
            ========================================================================== */
         @media (max-width: 992px) {
             .about-grid, .veille-grid { grid-template-columns: 1fr; }
             .hero-title { font-size: 3.5rem; }
+            .modal-body { grid-template-columns: 1fr; }
+            .ide-window, .presentation-window { max-height: 50vh; }
+            .veille-featured { grid-template-columns: 1fr; }
+            .featured-img-wrapper { min-height: 250px; }
+            .veille-stepper { flex-direction: column; }
+            .stepper-arrow { padding: 0; transform: rotate(90deg); }
         }
 
         @media (max-width: 768px) {
@@ -487,11 +808,13 @@
                 text-align: center;
             }
             .nav-links.active { transform: translateY(0); }
-            
             .hero-title { font-size: 2.8rem; }
             .org-branches { flex-direction: column; gap: 2rem; align-items: center; }
-            .org-branches::before, .org-branches .org-node::before { display: none; } /* On cache les lignes complexes sur mobile */
+            .org-branches::before, .org-branches .org-node::before { display: none; }
             .org-chief::after { display: none; }
+            .modal-container { margin: 1rem; }
+            .veille-stat { padding: 0.75rem 1rem; }
+            .veille-stat-divider { width: 100%; height: 1px; }
         }
     </style>
 </head>
@@ -558,16 +881,15 @@
                 
                 <div class="about-grid">
                     <div class="about-text gsap-reveal">
-                        <p>Hello ! Je suis Bilal, un développeur Front-End créatif basé en France. Mon objectif est de combler le fossé entre le design interactif et l'ingénierie technique.</p>
-                        <p>Spécialisé dans les écosystèmes JavaScript modernes, je conçois des interfaces "pixel-perfect" qui intègrent des animations avancées tout en garantissant des performances optimales et une accessibilité exemplaire.</p>
+                        <p>Hello ! Je suis Bilal, étudiant en <strong>BTS SIO 2ème année</strong> en alternance chez <strong>Aichouche Company</strong>. Passionné par le développement web et les nouvelles technologies, je construis des interfaces modernes tout en approfondissant mes compétences en entreprise.</p>
+                        <p>Chez Aichouche Company, j'interviens sur trois axes majeurs : <strong>Audit & Expertise</strong> des besoins informatiques, <strong>Stratégie Numérique</strong> et accompagnement dans le choix de solutions logicielles, et <strong>Transformation Digitale</strong> pour le déploiement d'outils technologiques améliorant la productivité et la sécurité des données.</p>
                     </div>
 
                     <div class="role-card glass gsap-reveal">
                         <div class="role-header">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" alt="Profil de Bilal" class="role-avatar">
                             <div class="role-info">
                                 <h3>Mon Rôle Actuel</h3>
-                                <p>Lead Développeur Front-End</p>
+                                <p>Alternant Développeur — Aichouche Company</p>
                                 <div class="social-links">
                                     <a href="#" target="_blank" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
                                     <a href="#" target="_blank" aria-label="GitHub"><i class="ph ph-github-logo"></i></a>
@@ -577,15 +899,15 @@
                         
                         <div class="stats-grid">
                             <div class="stat-item">
-                                <h4>4+</h4>
-                                <p>Années d'exp.</p>
+                                <h4>2ème</h4>
+                                <p>Année BTS SIO</p>
                             </div>
                             <div class="stat-item">
-                                <h4>30+</h4>
+                                <h4>3+</h4>
                                 <p>Projets Livrés</p>
                             </div>
                             <div class="stat-item">
-                                <h4>15+</h4>
+                                <h4>10+</h4>
                                 <p>Technos Maîtrisées</p>
                             </div>
                             <div class="stat-item">
@@ -604,21 +926,44 @@
                 <h2 class="section-title gsap-reveal">Mon <span>Entreprise</span></h2>
                 
                 <div class="exp-container gsap-reveal">
-                    <p class="exp-text">Je travaille actuellement chez <strong>TechNova Agency</strong>, une agence digitale primée où nous redéfinissons les standards du web moderne pour des clients internationaux.</p>
-                    
+                    <p class="exp-text">Je réalise mon alternance chez <strong>Aichouche Company</strong>, une société spécialisée dans le conseil et l'accompagnement informatique des entreprises, couvrant l'audit, la stratégie numérique et la transformation digitale.</p>
+
                     <button id="btn-more-exp" class="btn btn-outline">En savoir plus <i class="ph ph-caret-down"></i></button>
-                    
+
                     <div id="content-more-exp" class="exp-accordion">
-                        <p style="color: var(--text-muted); margin-bottom: 1rem;">Au sein de TechNova, j'ai la chance de travailler dans une structure agile. Mon rôle consiste à concevoir l'architecture front-end des projets majeurs, à mentorer les développeurs juniors et à implémenter des designs complexes en étroite collaboration avec l'équipe UI/UX.</p>
-                        
-                        <h4 style="margin-bottom: 1.5rem; margin-top: 2rem; text-align: center; font-family: 'Outfit', sans-serif;">Structure de l'équipe Tech</h4>
-                        <!-- Organigramme CSS -->
+                        <p style="color: var(--text-muted); margin-bottom: 2rem;">Aichouche Company intervient auprès des entreprises sur trois domaines d'activité complémentaires :</p>
+
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 2rem;">
+                            <div style="display: flex; align-items: flex-start; gap: 1rem; padding: 1.25rem; border-radius: 14px; background: rgba(59,130,246,0.06); border: 1px solid var(--glass-border);">
+                                <span style="font-size: 1.5rem; flex-shrink: 0;">🔍</span>
+                                <div>
+                                    <strong style="color: var(--text-main);">Audit & Expertise</strong>
+                                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">Analyse des besoins informatiques des entreprises pour optimiser leurs infrastructures existantes.</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 1rem; padding: 1.25rem; border-radius: 14px; background: rgba(59,130,246,0.06); border: 1px solid var(--glass-border);">
+                                <span style="font-size: 1.5rem; flex-shrink: 0;">🧭</span>
+                                <div>
+                                    <strong style="color: var(--text-main);">Stratégie Numérique</strong>
+                                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">Accompagnement dans le choix de solutions logicielles et l'architecture de systèmes complexes.</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 1rem; padding: 1.25rem; border-radius: 14px; background: rgba(59,130,246,0.06); border: 1px solid var(--glass-border);">
+                                <span style="font-size: 1.5rem; flex-shrink: 0;">🚀</span>
+                                <div>
+                                    <strong style="color: var(--text-main);">Transformation Digitale</strong>
+                                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">Aide au déploiement de nouveaux outils technologiques pour améliorer la productivité ou la sécurité des données.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-bottom: 1.5rem; margin-top: 2rem; text-align: center; font-family: 'Outfit', sans-serif;">Ma position dans l'équipe</h4>
                         <div class="organigram">
-                            <div class="org-node org-chief">CTO / Directeur Technique</div>
+                            <div class="org-node org-chief">Responsable / Maître d'apprentissage</div>
                             <div class="org-branches">
-                                <div class="org-node">Lead Back-End</div>
-                                <div class="org-node me">Moi (Lead Front-End)</div>
-                                <div class="org-node">Lead UI/UX</div>
+                                <div class="org-node">Consultant IT</div>
+                                <div class="org-node me">Moi (Alternant Dev)</div>
+                                <div class="org-node">Chargé de projet</div>
                             </div>
                         </div>
                     </div>
@@ -638,62 +983,65 @@
                 </div>
 
                 <div class="projects-grid">
-                    <!-- Carte 1 -->
+                    
+                    <!-- Carte 1 (Maison des Ligues - JAVA) -->
                     <div class="project-card gsap-reveal project-item pro">
                         <div class="project-img-wrapper">
-                            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop" alt="Dashboard FinTech" class="project-img">
+                            <!-- Image d'illustration évoquant la data / gestion RH -->
+                            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop" alt="Application RH Java" class="project-img">
                             <div class="project-overlay">
-                                <a href="#" class="btn btn-primary">Voir plus</a>
+                                <button class="btn btn-primary btn-open-modal" data-modal="modal-java">Voir les détails</button>
                             </div>
                         </div>
                         <div class="project-content">
-                            <span class="project-category">Projet Pro</span>
-                            <h3 class="project-title">Dashboard FinTech Analytics</h3>
-                            <p class="project-desc">Création d'un tableau de bord financier complet avec graphiques temps réel et interface d'administration complexe.</p>
+                            <span class="project-category">Projet Pro (M2L)</span>
+                            <h3 class="project-title">Gestion RH (Maison des Ligues)</h3>
+                            <p class="project-desc">Refonte d'une application de gestion du personnel pour des ligues sportives. Modélisation UML, authentification et contrôle des habilitations.</p>
                             <div class="project-tags">
-                                <span class="tag">React</span>
-                                <span class="tag">TypeScript</span>
-                                <span class="tag">Tailwind</span>
+                                <span class="tag">Java</span>
+                                <span class="tag">JDBC</span>
+                                <span class="tag">UML/MCD</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Carte 2 -->
+                    <!-- Carte 2 (Bot Discord) -->
                     <div class="project-card gsap-reveal project-item perso">
                         <div class="project-img-wrapper">
-                            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop" alt="Code Editor" class="project-img">
+                            <img src="https://images.unsplash.com/photo-1563206767-5b18f218e8de?q=80&w=800&auto=format&fit=crop" alt="Discord Bot Anti-Nuke" class="project-img">
                             <div class="project-overlay">
-                                <a href="#" class="btn btn-primary">Voir plus</a>
+                                <button class="btn btn-primary btn-open-modal" data-modal="modal-bot">Voir le code</button>
                             </div>
                         </div>
                         <div class="project-content">
                             <span class="project-category">Projet Perso</span>
-                            <h3 class="project-title">Web Code Editor</h3>
-                            <p class="project-desc">Un éditeur de code en ligne collaboratif, inspiré de VS Code, supportant de multiples langages de programmation.</p>
+                            <h3 class="project-title">Bot Discord "Anti-Nuke"</h3>
+                            <p class="project-desc">Un système de sécurité avancé pour serveurs Discord. Il détecte les comportements malveillants et neutralise instantanément la menace en retirant les rôles d'administration.</p>
                             <div class="project-tags">
-                                <span class="tag">Vue.js</span>
+                                <span class="tag">Discord.js v14</span>
                                 <span class="tag">Node.js</span>
-                                <span class="tag">WebSockets</span>
+                                <span class="tag">Sécurité</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Carte 3 -->
+                    <!-- Carte 3 (Skystorm - Laravel) -->
                     <div class="project-card gsap-reveal project-item pro">
                         <div class="project-img-wrapper">
-                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop" alt="E-Commerce 3D" class="project-img">
+                            <!-- Image d'illustration évoquant un réseau social web -->
+                            <img src="https://cdn.discordapp.com/attachments/921408195975581736/1500261686119104552/Gemini_Generated_Image_ycxxpjycxxpjycxx1.png?ex=69f7cb13&is=69f67993&hm=b48eabe9e9da61c1109b5f538e683c4a891c2fbe19dfae54445ee5825f3393ba&" alt="Réseau Social Skystorm" class="project-img">
                             <div class="project-overlay">
-                                <a href="#" class="btn btn-primary">Voir plus</a>
+                                <button class="btn btn-primary btn-open-modal" data-modal="modal-skystorm">Voir les détails</button>
                             </div>
                         </div>
                         <div class="project-content">
-                            <span class="project-category">Projet Pro</span>
-                            <h3 class="project-title">E-Commerce avec viewer 3D</h3>
-                            <p class="project-desc">Intégration d'une expérience d'achat immersive où les utilisateurs peuvent manipuler les produits en 3D via Three.js.</p>
+                            <span class="project-category">Projet Pro (BTS SIO)</span>
+                            <h3 class="project-title">Réseau Social "Skystorm"</h3>
+                            <p class="project-desc">Création d'une application web sociale interactive. Architecture MVC avec gestion des publications, d'un système de likes et d'abonnements.</p>
                             <div class="project-tags">
-                                <span class="tag">Three.js</span>
-                                <span class="tag">Next.js</span>
-                                <span class="tag">GSAP</span>
+                                <span class="tag">Laravel 12</span>
+                                <span class="tag">PHP / MVC</span>
+                                <span class="tag">MySQL</span>
                             </div>
                         </div>
                     </div>
@@ -701,47 +1049,177 @@
             </div>
         </section>
 
-        <!-- SECTION VEILLE TECHNOLOGIQUE -->
+        <!-- SECTION VEILLE TECHNOLOGIQUE — AMÉLIORÉE -->
         <section id="veille">
             <div class="container">
                 <h2 class="section-title gsap-reveal"><span>Veille</span> Technologique</h2>
-                
-                <div class="veille-grid">
-                    <div class="methodology gsap-reveal">
-                        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">Ma Méthodologie</h3>
-                        <div class="method-item">
-                            <div class="method-icon"><i class="ph ph-radar"></i></div>
-                            <div>
-                                <h4>Sourcing</h4>
-                                <p>Utilisation d'agrégateurs (Feedly), newsletters spécialisées et réseaux (Twitter, GitHub) pour capter l'information à la source.</p>
-                            </div>
+
+                <!-- Stats centrées sur Claude / IA -->
+                <div class="veille-stats gsap-reveal">
+                    <div class="veille-stat">
+                        <span class="veille-stat-number">#1</span>
+                        <span class="veille-stat-label">Classement Opus 2026</span>
+                    </div>
+                    <div class="veille-stat-divider"></div>
+                    <div class="veille-stat">
+                        <span class="veille-stat-number">200K</span>
+                        <span class="veille-stat-label">Tokens contexte</span>
+                    </div>
+                    <div class="veille-stat-divider"></div>
+                    <div class="veille-stat">
+                        <span class="veille-stat-number">4.7</span>
+                        <span class="veille-stat-label">Dernière version</span>
+                    </div>
+                    <div class="veille-stat-divider"></div>
+                    <div class="veille-stat">
+                        <span class="veille-stat-number">∞</span>
+                        <span class="veille-stat-label">Potentiel créatif</span>
+                    </div>
+                </div>
+
+                <!-- Méthodologie : Pourquoi je suis Claude de près -->
+                <div class="veille-methodology-wrapper gsap-reveal">
+                    <h3 class="veille-sub-title">Pourquoi je suis l'écosystème Claude</h3>
+                    <div class="veille-stepper">
+                        <div class="stepper-step">
+                            <div class="stepper-icon"><i class="ph ph-brain"></i></div>
+                            <h4>01. Découverte</h4>
+                            <p>Suivi des releases Anthropic, benchmarks LMSYS, HuggingFace Leaderboard et annonces officielles pour détecter chaque évolution de Claude.</p>
                         </div>
-                        <div class="method-item">
-                            <div class="method-icon"><i class="ph ph-flask"></i></div>
-                            <div>
-                                <h4>Analyse & Test</h4>
-                                <p>Mise en pratique via la création de "Proof of Concepts" (POC) pour tester les nouvelles librairies et frameworks (ex: Bun, Qwik).</p>
-                            </div>
+                        <div class="stepper-arrow"><i class="ph ph-arrow-right"></i></div>
+                        <div class="stepper-step">
+                            <div class="stepper-icon"><i class="ph ph-test-tube"></i></div>
+                            <h4>02. Évaluation</h4>
+                            <p>Tests comparatifs personnels (code, raisonnement, créativité) face à GPT-4o et Gemini Ultra pour mesurer concrètement la supériorité d'Opus.</p>
                         </div>
-                        <div class="method-item">
-                            <div class="method-icon"><i class="ph ph-share-network"></i></div>
-                            <div>
-                                <h4>Diffusion</h4>
-                                <p>Partage des trouvailles avec mon équipe via des réunions techniques hebdomadaires et rédaction d'articles techniques.</p>
+                        <div class="stepper-arrow"><i class="ph ph-arrow-right"></i></div>
+                        <div class="stepper-step">
+                            <div class="stepper-icon"><i class="ph ph-rocket-launch"></i></div>
+                            <h4>03. Intégration</h4>
+                            <p>Application des capacités de Claude dans mes projets : génération de code, review automatisée, rédaction technique et assistance UI/UX.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtres thématiques IA / Claude -->
+                <div class="veille-filters gsap-reveal">
+                    <button class="veille-filter-btn active" data-veille-filter="all">Tous</button>
+                    <button class="veille-filter-btn" data-veille-filter="opus">Claude Opus</button>
+                    <button class="veille-filter-btn" data-veille-filter="anthropic">Anthropic</button>
+                    <button class="veille-filter-btn" data-veille-filter="benchmark">Benchmarks</button>
+                    <button class="veille-filter-btn" data-veille-filter="usages">Usages pratiques</button>
+                </div>
+
+                <!-- Article mis en avant : Opus #1 -->
+                <div class="veille-featured gsap-reveal veille-item opus anthropic">
+                    <div class="featured-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=900&auto=format&fit=crop" alt="Claude Opus" class="featured-img">
+                        <span class="featured-badge"><i class="ph ph-star-four"></i> Article phare</span>
+                    </div>
+                    <div class="featured-content">
+                        <div>
+                            <div class="article-meta">
+                                <span class="article-category-badge ia">Claude Opus</span>
+                                <span class="article-read-time"><i class="ph ph-clock"></i> 10 min</span>
+                                <span class="article-date-badge">Mai 2026</span>
+                            </div>
+                            <h3 class="featured-title">Pourquoi Claude Opus 4 est l'IA n°1 en 2026</h3>
+                            <p class="featured-desc">Après des mois de tests intensifs, Claude Opus 4.7 s'impose comme le modèle de référence absolu : raisonnement multi-étapes imbattable, fenêtre de contexte de 200 000 tokens, écriture la plus naturelle du marché, et une sécurité by-design unique avec la Constitution AI. Contrairement à GPT-4o ou Gemini, Opus refuse les raccourcis et produit un travail d'une précision chirurgicale — particulièrement sur les tâches complexes de code, d'analyse et de création.</p>
+                        </div>
+                        <div class="featured-footer">
+                            <div class="article-tags-row">
+                                <span class="tag">Claude Opus 4.7</span>
+                                <span class="tag">Anthropic</span>
+                                <span class="tag">LLM</span>
+                                <span class="tag">Raisonnement</span>
+                            </div>
+                            <a href="https://anthropic.com" target="_blank" class="article-link">Lire <i class="ph ph-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grille d'articles sur Claude / Anthropic -->
+                <div class="veille-articles-grid">
+
+                    <div class="veille-article-card gsap-reveal veille-item benchmark">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop" alt="Benchmark" class="veille-article-img">
+                        <div class="veille-article-content">
+                            <div class="article-meta">
+                                <span class="article-category-badge ia">Benchmark</span>
+                                <span class="article-read-time"><i class="ph ph-clock"></i> 7 min</span>
+                            </div>
+                            <h4 class="veille-article-title">LMSYS Chatbot Arena 2026 : Opus 4 écrase la concurrence</h4>
+                            <p class="veille-article-desc">Analyse détaillée des résultats du classement mondial. Claude Opus bat GPT-4o et Gemini Ultra sur coding, math et raisonnement.</p>
+                            <div class="veille-article-footer">
+                                <span class="article-date-badge">Avr. 2026</span>
+                                <a href="#" class="article-link-small">Lire <i class="ph ph-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
 
-                    <div class="article-card gsap-reveal">
-                        <img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=800&auto=format&fit=crop" alt="Tech Watch Article" class="article-img">
-                        <div class="article-content">
-                            <span class="article-date">Mis en avant • Thématique : WebGL & Performances</span>
-                            <h3 class="article-title">L'avenir du rendu web avec WebGPU</h3>
-                            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">Exploration des capacités de WebGPU par rapport à WebGL. Comment cette nouvelle API va révolutionner les expériences immersives sur le web en utilisant directement la puissance de la carte graphique...</p>
-                            <a href="#" class="article-link">Lire l'article complet <i class="ph ph-arrow-right"></i></a>
+                    <div class="veille-article-card gsap-reveal veille-item anthropic">
+                        <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop" alt="Anthropic Constitution AI" class="veille-article-img">
+                        <div class="veille-article-content">
+                            <div class="article-meta">
+                                <span class="article-category-badge ia">Anthropic</span>
+                                <span class="article-read-time"><i class="ph ph-clock"></i> 6 min</span>
+                            </div>
+                            <h4 class="veille-article-title">Constitutional AI : l'approche unique d'Anthropic pour une IA sûre</h4>
+                            <p class="veille-article-desc">Comment la méthode de Constitutional AI rend Claude plus fiable et éthique que ses concurrents, et pourquoi ça compte.</p>
+                            <div class="veille-article-footer">
+                                <span class="article-date-badge">Mar. 2026</span>
+                                <a href="#" class="article-link-small">Lire <i class="ph ph-arrow-right"></i></a>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="veille-article-card gsap-reveal veille-item usages">
+                        <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=600&auto=format&fit=crop" alt="Claude Code" class="veille-article-img">
+                        <div class="veille-article-content">
+                            <div class="article-meta">
+                                <span class="article-category-badge web">Usages pratiques</span>
+                                <span class="article-read-time"><i class="ph ph-clock"></i> 5 min</span>
+                            </div>
+                            <h4 class="veille-article-title">Claude Code en production : mon retour après 3 mois</h4>
+                            <p class="veille-article-desc">Comment j'intègre Claude Code dans mon workflow quotidien de développeur front-end : revues de code, génération de composants, debug.</p>
+                            <div class="veille-article-footer">
+                                <span class="article-date-badge">Fév. 2026</span>
+                                <a href="#" class="article-link-small">Lire <i class="ph ph-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="veille-article-card gsap-reveal veille-item opus benchmark">
+                        <img src="https://images.unsplash.com/photo-1527430253228-e93688616381?q=80&w=600&auto=format&fit=crop" alt="Opus vs GPT" class="veille-article-img">
+                        <div class="veille-article-content">
+                            <div class="article-meta">
+                                <span class="article-category-badge ia">Opus vs GPT</span>
+                                <span class="article-read-time"><i class="ph ph-clock"></i> 8 min</span>
+                            </div>
+                            <h4 class="veille-article-title">Claude Opus 4 vs GPT-4o : 50 tests, un seul vainqueur</h4>
+                            <p class="veille-article-desc">Comparatif exhaustif sur 50 tâches réelles (code, analyse, rédaction, maths). Les résultats sont sans appel pour Opus.</p>
+                            <div class="veille-article-footer">
+                                <span class="article-date-badge">Jan. 2026</span>
+                                <a href="#" class="article-link-small">Lire <i class="ph ph-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
+
+                <!-- Sources spécialisées IA / Claude -->
+                <div class="veille-sources-wrapper gsap-reveal">
+                    <h3 class="veille-sub-title" style="text-align:center; margin-bottom:1.5rem;">Mes Sources sur Claude & Anthropic</h3>
+                    <div class="sources-grid">
+                        <div class="source-item"><i class="ph ph-globe"></i> anthropic.com</div>
+                        <div class="source-item"><i class="ph ph-chart-bar"></i> LMSYS Leaderboard</div>
+                        <div class="source-item"><i class="ph ph-robot"></i> HuggingFace</div>
+                        <div class="source-item"><i class="ph ph-youtube-logo"></i> Yannic Kilcher</div>
+                        <div class="source-item"><i class="ph ph-twitter-logo"></i> @AnthropicAI</div>
+                        <div class="source-item"><i class="ph ph-newspaper"></i> The Batch (DeepLearning.ai)</div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -766,6 +1244,313 @@
                 </form>
             </div>
         </section>
+
+        <!-- MODAL 1 : GESTION RH JAVA (M2L) -->
+        <div class="modal-overlay" id="modal-java">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 style="font-family: 'Outfit'; margin: 0;">Projet : Gestion RH (M2L)</h3>
+                    <button class="close-modal"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <!-- Colonne de gauche : Explications textuelles -->
+                    <div class="explanations-sidebar">
+                        <div class="expl-step">
+                            <h4><i class="ph ph-users"></i> Le Besoin Métier</h4>
+                            <p>J'ai réalisé la refonte d'une application de gestion RH pour des ligues sportives. L'enjeu principal était de passer d'un outil rudimentaire à une solution multi-utilisateurs entièrement sécurisée.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-tree-structure"></i> Modélisation & Analyse</h4>
+                            <p>Pour structurer ce projet, j'ai commencé par une phase d'analyse avec un arbre heuristique pour lister les fonctionnalités. J'ai ensuite conçu le <strong>MCD</strong> et utilisé la modélisation <strong>UML</strong> pour garantir une base de données cohérente et une architecture logique robuste avant de débuter tout développement.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-lock-key"></i> Sécurité & Contrôle d'accès</h4>
+                            <p>Le point clé de mon travail a été la mise en place d'un contrôle d'accès strict par rôle. Chaque utilisateur ne peut accéder qu'aux données correspondant à son niveau d'habilitation (Employé, Administrateur de ligue, Super-administrateur), ce qui garantit la confidentialité totale des informations sensibles de la ligue.</p>
+                        </div>
+                    </div>
+
+                    <!-- Colonne de droite : Call To Action Github -->
+                    <div class="presentation-window">
+                        <i class="ph ph-github-logo" style="font-size: 5rem; color: var(--text-main); margin-bottom: 1.5rem;"></i>
+                        <h4 style="font-size: 1.6rem; margin-bottom: 1rem; color: var(--text-main); font-family: 'Outfit';">Code Source & Ressources</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1rem; line-height: 1.6; max-width: 80%;">
+                            Découvrez l'intégralité du code Java de l'application, l'architecture orientée objet, la connexion JDBC ainsi que la documentation complète du projet directement sur mon dépôt GitHub.
+                        </p>
+                        <a href="https://github.com/REDA0704/personnel" target="_blank" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                            Accéder au code source sur GitHub <i class="ph ph-arrow-square-out"></i>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 2 : SKYSTORM (LARAVEL) -->
+        <div class="modal-overlay" id="modal-skystorm">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 style="font-family: 'Outfit'; margin: 0;">Projet : Skystorm (Laravel)</h3>
+                    <button class="close-modal"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <!-- Colonne de gauche : Explications textuelles -->
+                    <div class="explanations-sidebar">
+                        <div class="expl-step">
+                            <h4><i class="ph ph-chat-circle-text"></i> Le Concept</h4>
+                            <p>Mon second projet, Skystorm, est une application web sociale. L'objectif était de concevoir une plateforme interactive permettant aux utilisateurs de publier des messages, de suivre d'autres profils et d'interagir via un système de 'likes'.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-code"></i> Architecture & Base de données</h4>
+                            <p>Pour ce projet, j'ai utilisé le framework <strong>PHP Laravel 12</strong> en respectant l'architecture MVC (Modèle-Vue-Contrôleur). J'ai débuté par la conception du MCD pour structurer une base de données MySQL capable de gérer les relations complexes entre les utilisateurs, les abonnements et les publications.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-star"></i> Points Clés de Réalisation</h4>
+                            <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; margin-top: 0.5rem; padding-left: 1.2rem;">
+                                <li style="margin-bottom: 0.3rem;"><strong>Sécurité :</strong> Mise en place d'un système d'authentification robuste.</li>
+                                <li style="margin-bottom: 0.3rem;"><strong>Développement :</strong> Création du CRUD des publications et du moteur de 'follow' et de 'likes'.</li>
+                                <li style="margin-bottom: 0.3rem;"><strong>Qualité logicielle :</strong> Utilisation de Git pour le versionnage et réalisation de tests unitaires pour garantir la fiabilité.</li>
+                                <li><strong>Professionnalisation :</strong> Rédaction d'une documentation technique complète facilitant la maintenance.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Colonne de droite : Call To Action Github & Docs -->
+                    <div class="presentation-window">
+                        <i class="ph ph-globe-hemisphere-west" style="font-size: 5rem; color: var(--text-main); margin-bottom: 1.5rem;"></i>
+                        <h4 style="font-size: 1.6rem; margin-bottom: 1rem; color: var(--text-main); font-family: 'Outfit';">Ressources du Projet</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1rem; line-height: 1.6; max-width: 80%;">
+                            Découvrez le repository contenant le code source complet sous Laravel 12 réalisé pour mon épreuve E6 de BTS SIO.
+                        </p>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+                            <a href="https://github.com/behloulibilal7/BilalSkyStormZ" target="_blank" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                                <i class="ph ph-github-logo" style="margin-right: 0.5rem;"></i> Code Source
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 3 : CODE SOURCE BOT DISCORD -->
+        <div class="modal-overlay" id="modal-bot">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 style="font-family: 'Outfit'; margin: 0;">Code Source : Bot Anti-Nuke</h3>
+                    <button class="close-modal"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <!-- Colonne de gauche : Explications -->
+                    <div class="explanations-sidebar">
+                        <div class="expl-step">
+                            <h4><i class="ph ph-shield-check"></i> 1. Initialisation</h4>
+                            <p>Importation des dépendances, configuration des Intents Discord et vérification stricte des variables d'environnement (.env) pour empêcher un lancement compromis.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-bell-ringing"></i> 2. Alertes (Webhooks)</h4>
+                            <p>Utilisation d'un Webhook pour envoyer des alertes formatées (Embeds) dans un salon sécurisé sans dépendre de l'API classique des messages.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-magnifying-glass"></i> 3. Analyse des Logs</h4>
+                            <p>La fonction <code>checkAuditLog</code> récupère le dernier "Audit Log" de Discord pour identifier formellement l'utilisateur à l'origine d'une action destructrice récente.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-sword"></i> 4. Défense Active</h4>
+                            <p>Cœur de la sécurité : la fonction <code>nukeDefense</code> retire instantanément tous les rôles modifiables à l'utilisateur malveillant pour bloquer sa capacité de nuisance (whitelist applicable).</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-lightning"></i> 5. Événements</h4>
+                            <p>Le bot surveille en continu le serveur. Si un salon est supprimé ou un membre expulsé massivement, il intercepte l'événement et déclenche la défense.</p>
+                        </div>
+                    </div>
+
+                    <!-- Colonne de droite : IDE -->
+                    <div class="ide-window">
+                        <div class="ide-header">
+                            <div class="ide-controls">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <div class="ide-title"><i class="ph ph-file-js"></i> bot.js</div>
+                            <button class="btn-copy" id="copy-code-btn">
+                                <i class="ph ph-copy"></i> Copier
+                            </button>
+                        </div>
+                        <div class="ide-content">
+<pre><code class="language-javascript" id="bot-source-code">require('dotenv').config();
+const { 
+    Client, 
+    GatewayIntentBits, 
+    AuditLogEvent, 
+    WebhookClient, 
+    EmbedBuilder 
+} = require('discord.js');
+
+const TOKEN = process.env.DISCORD_TOKEN;
+const OWNER_ID = process.env.OWNER_ID;
+const WEBHOOK_URL = process.env.WEBHOOK_URL;
+
+// Vérification des variables
+if (!TOKEN || !OWNER_ID || !WEBHOOK_URL) {
+    console.error("ERREUR CRITIQUE : Variables manquantes dans le fichier .env");
+    console.error("Vérifie : DISCORD_TOKEN, OWNER_ID, WEBHOOK_URL");
+    process.exit(1);
+}
+
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildModeration,
+        GatewayIntentBits.GuildWebhooks,
+        GatewayIntentBits.GuildPresences
+    ]
+});
+
+const webhook = new WebhookClient({ url: WEBHOOK_URL });
+
+async function sendAlert(titre, description, color = 0xFF0000) {
+    const embed = new EmbedBuilder()
+        .setTitle(`SECURITE : ${titre}`)
+        .setDescription(description)
+        .setColor(color)
+        .setTimestamp()
+        .setFooter({ text: 'Anti-Nuke System' });
+
+    webhook.send({
+        username: 'Sentinel Bot',
+        avatarURL: client.user?.displayAvatarURL(),
+        embeds: [embed]
+    }).catch(console.error);
+}
+
+async function checkAuditLog(guild, typeAudit) {
+    await new Promise(r => setTimeout(r, 2000)); 
+
+    const fetchedLogs = await guild.fetchAuditLogs({
+        limit: 1,
+        type: typeAudit,
+    });
+    const log = fetchedLogs.entries.first();
+
+    if (!log) return null;
+    
+    const now = Date.now();
+    if (now - log.createdTimestamp > 15000) return null;
+
+    return log.executor;
+}
+
+async function nukeDefense(guild, executorId, actionType) {
+    if (executorId === OWNER_ID || executorId === client.user.id) return;
+
+    try {
+        const member = await guild.members.fetch(executorId);
+        if (!member) return;
+
+        const rolesRetirables = member.roles.cache.filter(role => 
+            role.name !== '@everyone' && 
+            role.editable &&              
+            !role.managed                
+        );
+
+        if (rolesRetirables.size > 0) {
+            await member.roles.remove(rolesRetirables);
+            
+            console.log(`PUNITION : ${rolesRetirables.size} roles retires a ${member.user.tag}`);
+
+            await sendAlert(
+                'MENACE NEUTRALISEE',
+                `**Coupable :** <@${executorId}> (${member.user.tag})\n` +
+                `**Action :** ${actionType}\n` +
+                `**Sanction :** ${rolesRetirables.size} roles retires.`
+            );
+        } else {
+            console.log(`Alerte : ${member.user.tag} a fait une action mais je n'ai aucun role a lui retirer.`);
+            sendAlert(
+                'ACTION SUSPECTE (SANS SANCTION)',
+                `ATTENTION : <@${executorId}> a fait : **${actionType}**.\nJe n'ai pas pu retirer de roles (Grade trop haut ou roles proteges).`,
+                0xFFA500
+            );
+        }
+
+    } catch (error) {
+        console.error(`Erreur punition:`, error);
+        sendAlert('ERREUR TECHNIQUE', `Impossible de punir <@${executorId}> : ${error.message}`, 0x555555);
+    }
+}
+
+client.once('ready', () => {
+    console.log(`${client.user.tag} est en ligne !`);
+    sendAlert('SYSTEME EN LIGNE', 'Le bot est actif sur le Serveur Local.', 0x00FF00);
+});
+
+client.on('channelDelete', async (channel) => {
+    const executor = await checkAuditLog(channel.guild, AuditLogEvent.ChannelDelete);
+    if (executor) nukeDefense(channel.guild, executor.id, `Suppression salon #${channel.name}`);
+});
+
+client.on('channelCreate', async (channel) => {
+    const executor = await checkAuditLog(channel.guild, AuditLogEvent.ChannelCreate);
+    if (executor) nukeDefense(channel.guild, executor.id, `Creation salon #${channel.name}`);
+});
+
+client.on('channelUpdate', async (oldChannel, newChannel) => {
+    if (oldChannel.name !== newChannel.name) {
+        const executor = await checkAuditLog(newChannel.guild, AuditLogEvent.ChannelUpdate);
+        if (executor) nukeDefense(newChannel.guild, executor.id, `Renommage salon #${oldChannel.name} -> #${newChannel.name}`);
+    }
+});
+
+client.on('roleDelete', async (role) => {
+    const executor = await checkAuditLog(role.guild, AuditLogEvent.RoleDelete);
+    if (executor) nukeDefense(role.guild, executor.id, `Suppression role ${role.name}`);
+});
+
+client.on('roleCreate', async (role) => {
+    const executor = await checkAuditLog(role.guild, AuditLogEvent.RoleCreate);
+    if (executor) nukeDefense(role.guild, executor.id, `Creation role ${role.name}`);
+});
+
+client.on('guildBanAdd', async (ban) => {
+    const executor = await checkAuditLog(ban.guild, AuditLogEvent.MemberBanAdd);
+    if (executor) nukeDefense(ban.guild, executor.id, `Bannissement d'un membre`);
+});
+
+client.on('guildMemberRemove', async (member) => {
+    const executor = await checkAuditLog(member.guild, AuditLogEvent.MemberKick);
+    if (executor && executor.target?.id === member.id) {
+        nukeDefense(member.guild, executor.id, `Expulsion (Kick) de ${member.user.tag}`);
+    }
+});
+
+client.on('guildMemberAdd', async (member) => {
+    if (member.user.bot) {
+        const executor = await checkAuditLog(member.guild, AuditLogEvent.BotAdd);
+        if (executor) nukeDefense(member.guild, executor.id, `Ajout bot non autorise ${member.user.tag}`);
+    }
+});
+
+client.on('webhooksUpdate', async (channel) => {
+    const executor = await checkAuditLog(channel.guild, AuditLogEvent.WebhookCreate);
+    if (executor) nukeDefense(channel.guild, executor.id, `Creation Webhook`);
+});
+
+client.on('guildUpdate', async (oldG, newG) => {
+    const executor = await checkAuditLog(newG, AuditLogEvent.GuildUpdate);
+    if (executor) nukeDefense(newG, executor.id, `Modification Serveur`);
+});
+
+client.login(TOKEN);</code></pre>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- FOOTER -->
@@ -789,8 +1574,14 @@
     <!-- GSAP & ScrollTrigger -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    
+    <!-- Highlight.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
     <script>
+        // Initialisation de Highlight.js pour la coloration syntaxique
+        hljs.highlightAll();
+
         // 1. GESTION DU LOADER
         window.addEventListener('load', () => {
             const loader = document.getElementById('loader');
@@ -933,7 +1724,7 @@
             localStorage.setItem('theme', newTheme);
         });
 
-        // 7.5 GESTION DE LA MODALE DU CODE SOURCE
+        // 8. GESTION DES MODALES
         const modalBtns = document.querySelectorAll('.btn-open-modal');
         const closeModalBtns = document.querySelectorAll('.close-modal');
         const overlays = document.querySelectorAll('.modal-overlay');
@@ -968,7 +1759,51 @@
             });
         });
 
-        // 8. ANIMATIONS GSAP AU DÉFILEMENT
+        // Fonctionnalité du bouton "Copier" (Modale 2)
+        const copyBtn = document.getElementById('copy-code-btn');
+        if(copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                const codeContent = document.getElementById('bot-source-code').innerText;
+                
+                // Copie dans le presse-papier
+                navigator.clipboard.writeText(codeContent).then(() => {
+                    // Changement visuel du bouton
+                    const originalHTML = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="ph ph-check"></i> Copié !';
+                    copyBtn.classList.add('copied');
+                    
+                    // Reset après 2 secondes
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                });
+            });
+        }
+
+        // 9. FILTRES VEILLE TECHNOLOGIQUE
+        const veilleBtns = document.querySelectorAll('.veille-filter-btn');
+        const veilleItems = document.querySelectorAll('.veille-item');
+
+        veilleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                veilleBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filter = btn.getAttribute('data-veille-filter');
+
+                veilleItems.forEach(item => {
+                    if (filter === 'all' || item.classList.contains(filter)) {
+                        item.classList.remove('hidden');
+                        gsap.fromTo(item, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+                ScrollTrigger.refresh();
+            });
+        });
+
+        // 10. ANIMATIONS GSAP AU DÉFILEMENT
         function initGSAP() {
             // Révélation classique venant du bas
             gsap.utils.toArray('.gsap-reveal').forEach(element => {
