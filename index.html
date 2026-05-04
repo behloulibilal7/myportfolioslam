@@ -978,6 +978,7 @@
                 
                 <div class="filters gsap-reveal">
                     <button class="filter-btn active" data-filter="all">Tous</button>
+                    <button class="filter-btn" data-filter="mission">Missions</button>
                     <button class="filter-btn" data-filter="pro">Projets Pros</button>
                     <button class="filter-btn" data-filter="perso">Projets Persos</button>
                 </div>
@@ -1045,9 +1046,249 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Missions 1ère année -->
+                    <div class="project-card gsap-reveal project-item mission">
+                        <div class="project-img-wrapper" style="height:160px; background:var(--card-bg); display:flex; align-items:center; justify-content:center;">
+                            <i class="ph ph-image" style="font-size:5rem; color:var(--primary);"></i>
+                        </div>
+                        <div class="project-content">
+                            <span class="project-category">Mission — 1ère année</span>
+                            <h3 class="project-title">Insertion de Contenus</h3>
+                            <p class="project-desc">Mise à jour des contenus visuels (photos, logos) sur les sites web clients via CMS.</p>
+                            <div style="margin-top:1rem;">
+                                <button class="btn btn-primary btn-open-modal" data-modal="modal-mission-insertion" style="width:100%;">Voir la mission</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="project-card gsap-reveal project-item mission">
+                        <div class="project-img-wrapper" style="height:160px; background:var(--card-bg); display:flex; align-items:center; justify-content:center;">
+                            <i class="ph ph-headset" style="font-size:5rem; color:var(--primary);"></i>
+                        </div>
+                        <div class="project-content">
+                            <span class="project-category">Mission — 1ère année</span>
+                            <h3 class="project-title">Support Utilisateurs</h3>
+                            <p class="project-desc">Traitement des incidents de niveau 1, diagnostic et escalade vers les équipes techniques.</p>
+                            <div style="margin-top:1rem;">
+                                <button class="btn btn-primary btn-open-modal" data-modal="modal-mission-support" style="width:100%;">Voir la mission</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Missions 2ème année -->
+                    <div class="project-card gsap-reveal project-item mission">
+                        <div class="project-img-wrapper" style="height:160px; background:var(--card-bg); display:flex; align-items:center; justify-content:center;">
+                            <i class="ph ph-magnifying-glass" style="font-size:5rem; color:var(--primary);"></i>
+                        </div>
+                        <div class="project-content">
+                            <span class="project-category">Mission — 2ème année</span>
+                            <h3 class="project-title">Analyse de Besoins Clients</h3>
+                            <p class="project-desc">Participation aux réunions clients, identification des besoins et rédaction des spécifications fonctionnelles.</p>
+                            <div style="margin-top:1rem;">
+                                <button class="btn btn-primary btn-open-modal" data-modal="modal-mission-analyse" style="width:100%;">Voir la mission</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="project-card gsap-reveal project-item mission">
+                        <div class="project-img-wrapper" style="height:160px; background:var(--card-bg); display:flex; align-items:center; justify-content:center;">
+                            <i class="ph ph-check-square" style="font-size:5rem; color:var(--primary);"></i>
+                        </div>
+                        <div class="project-content">
+                            <span class="project-category">Mission — 2ème année</span>
+                            <h3 class="project-title">Recette Fonctionnelle</h3>
+                            <p class="project-desc">Validation de la conformité des applications livrées via des scénarios de tests et rapport de recette.</p>
+                            <div style="margin-top:1rem;">
+                                <button class="btn btn-primary btn-open-modal" data-modal="modal-mission-recette" style="width:100%;">Voir la mission</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="project-card gsap-reveal project-item mission">
+                        <div class="project-img-wrapper" style="height:160px; background:var(--card-bg); display:flex; align-items:center; justify-content:center;">
+                            <i class="ph ph-chalkboard-teacher" style="font-size:5rem; color:var(--primary);"></i>
+                        </div>
+                        <div class="project-content">
+                            <span class="project-category">Mission — 2ème année</span>
+                            <h3 class="project-title">Formation Utilisateurs</h3>
+                            <p class="project-desc">Animation de sessions de formation en présentiel et distanciel, rédaction de guides utilisateurs.</p>
+                            <div style="margin-top:1rem;">
+                                <button class="btn btn-primary btn-open-modal" data-modal="modal-mission-formation" style="width:100%;">Voir la mission</button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
+
+        <!-- MODALS MISSIONS -->
+
+        <!-- Modal : Insertion de Contenus -->
+        <div class="modal-overlay" id="modal-mission-insertion">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 style="font-family:'Outfit'; margin:0;">Mission : Insertion de Contenus</h3>
+                    <button class="close-modal"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="explanations-sidebar">
+                        <div class="expl-step">
+                            <h4><i class="ph ph-info"></i> Contexte</h4>
+                            <p>Mise à jour des contenus visuels sur les sites web des clients.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-list-checks"></i> Tâches réalisées</h4>
+                            <ul style="color:var(--text-muted); font-size:0.85rem; line-height:1.8; margin-top:0.5rem; padding-left:1.2rem;">
+                                <li>Réception des photos/logos fournis par les clients</li>
+                                <li>Redimensionnement et optimisation des images</li>
+                                <li>Insertion dans les pages web via CMS</li>
+                                <li>Vérification du rendu sur différents supports</li>
+                                <li>Validation avec le client</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="presentation-window" style="justify-content:center; align-items:center;">
+                        <i class="ph ph-image" style="font-size:7rem; color:var(--primary); margin-bottom:1rem;"></i>
+                        <h4 style="font-family:'Outfit'; font-size:1.4rem; text-align:center;">1ère année — 2024 / 2025</h4>
+                        <p style="color:var(--text-muted); text-align:center; margin-top:1rem; font-size:0.95rem; line-height:1.6;">Gestion et intégration de contenus visuels dans des CMS clients.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal : Support Utilisateurs -->
+        <div class="modal-overlay" id="modal-mission-support">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 style="font-family:'Outfit'; margin:0;">Mission : Support Utilisateurs</h3>
+                    <button class="close-modal"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="explanations-sidebar">
+                        <div class="expl-step">
+                            <h4><i class="ph ph-info"></i> Contexte</h4>
+                            <p>Assurer le support de premier niveau aux utilisateurs finaux des clients.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-list-checks"></i> Tâches réalisées</h4>
+                            <ul style="color:var(--text-muted); font-size:0.85rem; line-height:1.8; margin-top:0.5rem; padding-left:1.2rem;">
+                                <li>Réception et traitement des demandes par email/téléphone</li>
+                                <li>Diagnostic des problèmes courants</li>
+                                <li>Réponse aux questions basiques sur l'utilisation des applications</li>
+                                <li>Escalade vers le niveau 2 si nécessaire</li>
+                                <li>Documentation des incidents dans l'outil de ticketing</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="presentation-window" style="justify-content:center; align-items:center;">
+                        <i class="ph ph-headset" style="font-size:7rem; color:var(--primary); margin-bottom:1rem;"></i>
+                        <h4 style="font-family:'Outfit'; font-size:1.4rem; text-align:center;">1ère année — 2024 / 2025</h4>
+                        <p style="color:var(--text-muted); text-align:center; margin-top:1rem; font-size:0.95rem; line-height:1.6;">Support N1 : traitement des incidents et satisfaction utilisateurs.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal : Analyse de Besoins -->
+        <div class="modal-overlay" id="modal-mission-analyse">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 style="font-family:'Outfit'; margin:0;">Mission : Analyse de Besoins Clients</h3>
+                    <button class="close-modal"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="explanations-sidebar">
+                        <div class="expl-step">
+                            <h4><i class="ph ph-info"></i> Contexte</h4>
+                            <p>Participation aux réunions d'analyse des besoins clients.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-list-checks"></i> Tâches réalisées</h4>
+                            <ul style="color:var(--text-muted); font-size:0.85rem; line-height:1.8; margin-top:0.5rem; padding-left:1.2rem;">
+                                <li>Participation aux réunions avec les clients</li>
+                                <li>Prise de notes et rédaction de comptes-rendus</li>
+                                <li>Identification des besoins fonctionnels</li>
+                                <li>Proposition de solutions techniques</li>
+                                <li>Rédaction de spécifications fonctionnelles</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="presentation-window" style="justify-content:center; align-items:center;">
+                        <i class="ph ph-magnifying-glass" style="font-size:7rem; color:var(--primary); margin-bottom:1rem;"></i>
+                        <h4 style="font-family:'Outfit'; font-size:1.4rem; text-align:center;">2ème année — 2025 / 2026</h4>
+                        <p style="color:var(--text-muted); text-align:center; margin-top:1rem; font-size:0.95rem; line-height:1.6;">Recueil et formalisation des besoins clients en spécifications fonctionnelles.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal : Recette Fonctionnelle -->
+        <div class="modal-overlay" id="modal-mission-recette">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 style="font-family:'Outfit'; margin:0;">Mission : Recette Fonctionnelle</h3>
+                    <button class="close-modal"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="explanations-sidebar">
+                        <div class="expl-step">
+                            <h4><i class="ph ph-info"></i> Contexte</h4>
+                            <p>Validation de la conformité des applications livrées.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-list-checks"></i> Tâches réalisées</h4>
+                            <ul style="color:var(--text-muted); font-size:0.85rem; line-height:1.8; margin-top:0.5rem; padding-left:1.2rem;">
+                                <li>Préparation des scénarios de tests</li>
+                                <li>Exécution des tests fonctionnels</li>
+                                <li>Vérification de la conformité au cahier des charges</li>
+                                <li>Rédaction du rapport de recette</li>
+                                <li>Validation finale avant mise en production</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="presentation-window" style="justify-content:center; align-items:center;">
+                        <i class="ph ph-check-square" style="font-size:7rem; color:var(--primary); margin-bottom:1rem;"></i>
+                        <h4 style="font-family:'Outfit'; font-size:1.4rem; text-align:center;">2ème année — 2025 / 2026</h4>
+                        <p style="color:var(--text-muted); text-align:center; margin-top:1rem; font-size:0.95rem; line-height:1.6;">Garantir la qualité et la conformité des livraisons avant mise en production.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal : Formation Utilisateurs -->
+        <div class="modal-overlay" id="modal-mission-formation">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 style="font-family:'Outfit'; margin:0;">Mission : Formation Utilisateurs</h3>
+                    <button class="close-modal"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="explanations-sidebar">
+                        <div class="expl-step">
+                            <h4><i class="ph ph-info"></i> Contexte</h4>
+                            <p>Animation de sessions de formation pour les utilisateurs finaux.</p>
+                        </div>
+                        <div class="expl-step">
+                            <h4><i class="ph ph-list-checks"></i> Tâches réalisées</h4>
+                            <ul style="color:var(--text-muted); font-size:0.85rem; line-height:1.8; margin-top:0.5rem; padding-left:1.2rem;">
+                                <li>Préparation des supports de formation</li>
+                                <li>Animation des sessions en présentiel ou distanciel</li>
+                                <li>Démonstration des fonctionnalités</li>
+                                <li>Réponse aux questions des utilisateurs</li>
+                                <li>Rédaction de guides utilisateurs</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="presentation-window" style="justify-content:center; align-items:center;">
+                        <i class="ph ph-chalkboard-teacher" style="font-size:7rem; color:var(--primary); margin-bottom:1rem;"></i>
+                        <h4 style="font-family:'Outfit'; font-size:1.4rem; text-align:center;">2ème année — 2025 / 2026</h4>
+                        <p style="color:var(--text-muted); text-align:center; margin-top:1rem; font-size:0.95rem; line-height:1.6;">Transmission des connaissances et accompagnement des utilisateurs finaux.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- SECTION VEILLE TECHNOLOGIQUE — AMÉLIORÉE -->
         <section id="veille">
